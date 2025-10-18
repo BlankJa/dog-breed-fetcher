@@ -28,11 +28,9 @@ public class CachingBreedFetcher implements BreedFetcher {
             return cache.get(key);
         }
 
-        // not cached: call the underlying fetcher and record the call
         callsMade++;
         List<String> result = delegate.getSubBreeds(breed);
 
-        // cache successful results only (as unmodifiable copy)
         List<String> copy = Collections.unmodifiableList(new ArrayList<>(result));
         cache.put(key, copy);
         return copy;

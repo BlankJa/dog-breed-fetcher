@@ -43,7 +43,6 @@ public class DogApiBreedFetcher implements BreedFetcher {
             String status = obj.optString("status", "error");
 
             if (!"success".equalsIgnoreCase(status)) {
-                // API returns: {"status":"error","message":"Breed not found (main breed does not exist)","code":404}
                 throw new BreedFetcher.BreedNotFoundException(breed);
             }
 
@@ -54,7 +53,6 @@ public class DogApiBreedFetcher implements BreedFetcher {
             }
             return result;
         } catch (Exception e) {
-            // Map all errors to BreedNotFoundException per interface contract
             throw new BreedFetcher.BreedNotFoundException(breed);
         }
     }
