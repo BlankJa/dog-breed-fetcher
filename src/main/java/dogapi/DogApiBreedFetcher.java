@@ -25,35 +25,44 @@ public class DogApiBreedFetcher implements BreedFetcher {
      */
     @Override
     public List<String> getSubBreeds(String breed) throws BreedFetcher.BreedNotFoundException {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(java.time.Duration.ofSeconds(5))
+                .readTimeout(java.time.Duration.ofSeconds(5))
+                .callTimeout(java.time.Duration.ofSeconds(10))
+                .build();
 
-        OkHttpClient client = new OkHttpClient();
         String url = "https://dog.ceo/api/breed/" + breed.toLowerCase() + "/list";
 
         Request request = new Request.Builder()
                 .url(url)
                 .get()
+                .header("User-Agent", "DogBreedFetcher/1.0 (+https://example.com)")
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
             if (response.body() == null) {
                 throw new BreedFetcher.BreedNotFoundException(breed);
             }
+
             String json = response.body().string();
+
             JSONObject obj = new JSONObject(json);
-            String status = obj.optString("status", "error");
+            String status = obj.optString("status", response.isSuccessful() ? "success" : "error");
 
             if (!"success".equalsIgnoreCase(status)) {
                 throw new BreedFetcher.BreedNotFoundException(breed);
             }
 
             JSONArray arr = obj.getJSONArray("message");
-            List<String> result = new ArrayList<>();
+            List<String> result = new java.util.ArrayList<>();
             for (int i = 0; i < arr.length(); i++) {
                 result.add(arr.getString(i));
             }
             return result;
-        } catch (Exception e) {
+
+        } catch (org.json.JSONException | java.io.IOException e) {
             throw new BreedFetcher.BreedNotFoundException(breed);
         }
     }
+
 }
